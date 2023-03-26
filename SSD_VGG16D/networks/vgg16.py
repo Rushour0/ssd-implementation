@@ -57,38 +57,38 @@ class VGG16BaseNetwork(nn.Module):
     def forward(self, image):
         '''
             Forward propagation
-            image: image, a tensor of dimensions (N, 3, 300, 300)
+            image: image, a tensor of dimensions (N, 3, 256, 256)
             
             Out: feature map conv4_3, conv7
         '''
-        x = image    #(N, 3, 300, 300)
-        x = F.relu(self.conv1_1(x))    #(N, 64, 300, 300)
-        x = F.relu(self.conv1_2(x))    #(N, 64, 300, 300)
-        x = self.pool1(x)    #(N, 64, 150, 150)
+        x = image    #(N, 3, 256, 256)
+        x = F.relu(self.conv1_1(x))    #(N, 64, 256, 256)
+        x = F.relu(self.conv1_2(x))    #(N, 64, 256, 256)
+        x = self.pool1(x)    #(N, 64, 128, 128)
         
-        x = F.relu(self.conv2_1(x))    #(N, 128, 150, 150)
-        x = F.relu(self.conv2_2(x))    #(N, 128, 150, 150)
-        x = self.pool2(x)    #(N, 128, 75, 75)
+        x = F.relu(self.conv2_1(x))    #(N, 128, 128, 128)
+        x = F.relu(self.conv2_2(x))    #(N, 128, 128, 128)
+        x = self.pool2(x)    #(N, 128, 64, 64)
         
-        x = F.relu(self.conv3_1(x))    #(N, 256, 75, 75)
-        x = F.relu(self.conv3_2(x))    #(N, 256, 75, 75)
-        x = F.relu(self.conv3_3(x))    #(N, 256, 75, 75)
-        x = self.pool3(x)    #(N, 256, 38, 38)
+        x = F.relu(self.conv3_1(x))    #(N, 256, 64, 64)
+        x = F.relu(self.conv3_2(x))    #(N, 256, 64, 64)
+        x = F.relu(self.conv3_3(x))    #(N, 256, 64, 64)
+        x = self.pool3(x)    #(N, 256, 32, 32)
         
-        x = F.relu(self.conv4_1(x))    #(N, 512, 38, 38)
-        x = F.relu(self.conv4_2(x))    #(N, 512, 38, 38)
-        x = F.relu(self.conv4_3(x))    #(N, 512, 38, 38)
-        conv4_3_out = x    #(N, 512, 38, 38)
-        x = self.pool4(x)    #(N, 512, 19, 19)
+        x = F.relu(self.conv4_1(x))    #(N, 512, 32, 32)
+        x = F.relu(self.conv4_2(x))    #(N, 512, 32, 32)
+        x = F.relu(self.conv4_3(x))    #(N, 512, 32, 32)
+        conv4_3_out = x    #(N, 512, 32, 32)
+        x = self.pool4(x)    #(N, 512, 16, 16)
         
-        x = F.relu(self.conv5_1(x))    #(N, 512, 19, 19)
-        x = F.relu(self.conv5_2(x))    #(N, 512, 19, 19)
-        x = F.relu(self.conv5_3(x))    #(N, 512, 19, 19)
-        x = self.pool5(x)    #(N, 512, 19, 19)
+        x = F.relu(self.conv5_1(x))    #(N, 512, 16, 16)
+        x = F.relu(self.conv5_2(x))    #(N, 512, 16, 16)
+        x = F.relu(self.conv5_3(x))    #(N, 512, 16, 16)
+        x = self.pool5(x)    #(N, 512, 16, 16)
         
-        x = F.relu(self.conv6(x))    #(N, 1024, 19, 19)
+        x = F.relu(self.conv6(x))    #(N, 1024, 16, 16)
         
-        conv7_out = F.relu(self.conv7(x))    #(N, 1024, 19, 19)
+        conv7_out = F.relu(self.conv7(x))    #(N, 1024, 16, 16)
         
         return conv4_3_out, conv7_out
     
