@@ -1,6 +1,5 @@
 # SSD Implmentation using PyTorch
 
----
 
 ## Introduction
 
