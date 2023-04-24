@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Apr  4 21:19:33 2020
-
-@author: NAT
-"""
 import argparse
 from SSD_VGG16D.utils import *
 from SSD_VGG16D.functions import MultiBoxLoss, VOCDataset, Metrics, create_json_data, display_gpu_info
@@ -154,7 +148,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()
     losses = Metrics()
 
-    for i, (images, boxes, labels, _) in enumerate(train_loader):
+    for i, (images, boxes, labels, _) in tdqm(train_loader):
 
         images = images.to(device)  # (batch_size (N), 3, 256, 256)
         boxes = [b.to(device) for b in boxes]
@@ -178,6 +172,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         losses.update(loss.item(), images.size(0))
 
         # if i % print_freq == 0:
+        
 
         print('Epoch: [{0}][{1}/{2}]\t' 'Loss {loss.val:.4f} ( Average Loss per epoch: {loss.avg:.4f})\t'.format(
             epoch, i, len(train_loader), loss=losses), flush=True, end=('\n' if i == len(train_loader)-1 else '\r'))
