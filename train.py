@@ -7,6 +7,7 @@ import torch.optim as optim
 import torch.backends.cudnn as cudnn
 import torch
 import sys
+from tqdm import tqdm
 sys.path.append("./model/")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -19,9 +20,10 @@ def str2bool(v):
 ap = argparse.ArgumentParser()
 ap.add_argument("--dataset_root", default="./JSONdata/",
                 help="Dataroot directory path")
-ap.add_argument("--batch_size", default=8, type=int,
+ap.add_argument("--batch_size", default=4, type=int,
                 help="Batch size for training")
-ap.add_argument("--num_workers", default=4, type=int, help="Number of workers")
+ap.add_argument("--num_workers", default=12,
+                type=int, help="Number of workers")
 ap.add_argument("--lr", "--learning-rate", default=1e-3,
                 type=float, help="Learning rate")
 ap.add_argument("--cuda", default=True, type=str2bool,
@@ -148,9 +150,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()
     losses = Metrics()
 
-    for i, (images, boxes, labels, _) in tdqm(train_loader):
+    for i,(images, boxes, labels, _) in tqdm(enumerate(train_loader, desc=f"Epoch {epoch}: ", unit="images")):
 
-        images = images.to(device)  # (batch_size (N), 3, 256, 256)
+        images = images.to(device)  # (batch_size (N), 2, 256, 256)
         boxes = [b.to(device) for b in boxes]
         labels = [l.to(device) for l in labels]
 
@@ -172,10 +174,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
         losses.update(loss.item(), images.size(0))
 
         # if i % print_freq == 0:
-        
 
-        print('Epoch: [{0}][{1}/{2}]\t' 'Loss {loss.val:.4f} ( Average Loss per epoch: {loss.avg:.4f})\t'.format(
-            epoch, i, len(train_loader), loss=losses), flush=True, end=('\n' if i == len(train_loader)-1 else '\r'))
+        print(torch.cuda.memory_summary(device=0, abbreviated=False), 'Loss {loss.val:.4f} ( Average Loss per epoch: {loss.avg:.4f})\t'.format(loss=losses),
+              flush=True, end=('\n' if i == len(train_loader)-1 else '\r'))
 
     del locs_pred, cls_pred, images, boxes, labels
 
