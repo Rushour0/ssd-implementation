@@ -20,10 +20,10 @@ class SSD256(nn.Module):
         super(SSD256, self).__init__()
 
         self.num_classes = num_classes
-        self.base_model = VGG16DBaseNetwork()
         self.aux_net = AuxiliaryNetwork()
+        self.base_model = VGG16DBaseNetwork()
         self.pred_net = PredictionNetwork(num_classes)
-
+        
         # Rescale factor for conv4_3, it is learned during back-prop
         self.L2Norm = L2Norm(channels=512, scale=20)
 
@@ -39,11 +39,11 @@ class SSD256(nn.Module):
         '''
         conv4_3_out, conv7_out = self.base_model(
             image)  # (N, 512, 32, 32), (N, 1024, 16, 16)
-
         conv4_3_out = self.L2Norm(conv4_3_out)  # (N, 512, 32, 32)
 
         conv8_2_out, conv9_2_out, conv10_2_out, conv11_2_out = self.aux_net(
             conv7_out)
+        
         #(N, 512, 8, 8), (N, 256, 4, 4), (N, 256, 2, 2), (N, 256, 1, 1)
 
         locs_pred, cls_pred = self.pred_net(conv4_3_out, conv7_out, conv8_2_out, conv9_2_out,
@@ -93,7 +93,7 @@ class SSD256(nn.Module):
         default_boxes = torch.FloatTensor(
             default_boxes).to(device)  # (6132, 4)
         default_boxes.clamp_(0, 1)
-        print(default_boxes.size(0))
+
         assert default_boxes.size(0) == 6132
         assert default_boxes.size(1) == 4
         return default_boxes

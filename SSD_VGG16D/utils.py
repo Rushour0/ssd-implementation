@@ -28,12 +28,6 @@ def colorstr(string, color='green'):
     )
     return '\033[1;%dm%s\033[0m' % (colors[color], string)
 
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 12 10:10:33 2020
-
-@author: NAT
-"""
 import PIL
 import torch
 import json
@@ -182,9 +176,9 @@ def lighting_noise(image):
     return new_image
 #-----------------------------------------------------------
 #Resize
-def resize(image, boxes, dims=(300, 300), return_percent_coords=True):
+def resize(image, boxes, dims=(256, 256), return_percent_coords=True):
     '''
-        Resize image to (300, 300)  for SSD300
+        Resize image to (256, 256)  for SSD256
         image: A PIL image
         boxes: bounding boxes, a tensor of dimensions (n_objects, 4)
         
@@ -400,8 +394,8 @@ def transform(image, boxes, labels, difficulties, split):
         #Flip image
         new_image, new_boxes = random_flip(new_image, new_boxes)
         
-    #Resize image to (300, 300)
-    new_image, new_boxes = resize(new_image, new_boxes, dims= (300, 300))
+    #Resize image to (256, 256)
+    new_image, new_boxes = resize(new_image, new_boxes, dims= (256, 256))
         
     new_image = F.to_tensor(new_image)
     new_image = F.normalize(new_image, mean=mean, std=std)
@@ -487,7 +481,7 @@ def save_checkpoint(epoch, model, optimizer):
         Save model checkpoint
     '''
     state = {'epoch': epoch, "model": model, "optimizer": optimizer}
-    filename = "model_state_ssd300.pth.tar"
+    filename = "check_ssd256.pth.tar"
     torch.save(state, filename)
     
 def clip_grad(optimizer, grad_clip):

@@ -10,16 +10,17 @@ class AuxiliaryNetwork(nn.Module):
         super(AuxiliaryNetwork, self).__init__()
         
         self.conv8_1 = nn.Conv2d(1024, 256, kernel_size=(1, 1), padding= 0)
-        self.conv8_2 = nn.Conv2d(256, 512, kernel_size= (3, 3), padding= 1, stride= 2)
+        
+        self.conv8_2 = nn.Conv2d(256, 512, kernel_size= (2, 2), padding= 0, stride= 2)
         
         self.conv9_1 = nn.Conv2d(512, 128, kernel_size= (1, 1), padding= 0)
-        self.conv9_2 = nn.Conv2d(128, 256, kernel_size= (3, 3), padding= 1, stride= 2)
+        self.conv9_2 = nn.Conv2d(128, 256, kernel_size= (2, 2), padding= 0, stride= 2)
         
         self.conv10_1 = nn.Conv2d(256, 128, kernel_size= (1, 1), padding= 0)
-        self.conv10_2 = nn.Conv2d(128, 256, kernel_size= (3, 3), padding= 0)
+        self.conv10_2 = nn.Conv2d(128, 256, kernel_size= (2, 2), padding= 0, stride= 2)
         
         self.conv11_1 = nn.Conv2d(256, 128, kernel_size= (1, 1), padding= 0)
-        self.conv11_2 = nn.Conv2d(128, 256, kernel_size= (3, 3), padding= 0)
+        self.conv11_2 = nn.Conv2d(128, 256, kernel_size= (2, 2), padding= 0)
         
         self.weights_init()
     
@@ -27,24 +28,24 @@ class AuxiliaryNetwork(nn.Module):
         '''
             Forward propagation
             conv7_out: feature map from basemodel VGG-16, tensor of 
-            dimensions of (N, 1024, 19, 19)
+            dimensions of (N, 1024, 16, 16)
             
             Out: feature map conv8_2, conv9_2, conv10_2, conv11_2
         '''
-        x = conv7_out    #(N, 1024, 19, 19)
-        x = F.relu(self.conv8_1(x))    #(N, 256, 19, 19)
-        x = F.relu(self.conv8_2(x))    #(N, 512, 10, 10)
+        x = conv7_out    #(N, 1024, 16, 16)
+        x = F.relu(self.conv8_1(x))    #(N, 256, 16, 16)
+        x = F.relu(self.conv8_2(x))    #(N, 512, 8, 8)
         conv8_2_out = x
         
-        x = F.relu(self.conv9_1(x))    #(N, 128, 10, 10)
-        x = F.relu(self.conv9_2(x))    #(N, 256, 5, 5)
+        x = F.relu(self.conv9_1(x))    #(N, 128, 8, 8)
+        x = F.relu(self.conv9_2(x))    #(N, 256, 4, 4)
         conv9_2_out = x
         
-        x = F.relu(self.conv10_1(x))   #(N, 128, 5, 5)
-        x = F.relu(self.conv10_2(x))   #(N, 256, 3, 3)
+        x = F.relu(self.conv10_1(x))   #(N, 128, 4, 4)
+        x = F.relu(self.conv10_2(x))   #(N, 256, 2, 2)
         conv10_2_out = x
         
-        x = F.relu(self.conv11_1(x))   #(N, 128, 3, 3)
+        x = F.relu(self.conv11_1(x))   #(N, 128, 2, 2)
         conv11_2_out = F.relu(self.conv11_2(x))   #(N, 256, 1, 1)
         
         return conv8_2_out, conv9_2_out, conv10_2_out, conv11_2_out

@@ -5,10 +5,10 @@ Created on Sat Apr  4 21:19:33 2020
 @author: NAT
 """
 import argparse
-from .utils import *
-from .functions import MultiBoxLoss, VOCDataset, Metrics
-from .networks import AuxiliaryNetwork, PredictionNetwork, VGG16DBaseNetwork, DetectionNetwork
-from .ssd import SSD256
+from SSD_VGG16D.utils import *
+from SSD_VGG16D.functions import MultiBoxLoss, VOCDataset, Metrics, create_json_data, display_gpu_info
+from SSD_VGG16D.networks import AuxiliaryNetwork, PredictionNetwork, VGG16DBaseNetwork, DetectionNetwork
+from SSD_VGG16D.ssd import SSD256
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 import torch
@@ -66,6 +66,8 @@ cudnn.benchmark = args.cuda
 
 def main():
     global start_epoch, label_map, epoch, checkpoint, decay_lr_at
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(colorstr("Initializing model...", "blue"))
     # Init model or load checkpoint
     if checkpoint is None:
         start_epoch = 0
@@ -82,6 +84,8 @@ def main():
                               lr=lr, momentum=momentum, weight_decay=weight_decay)
 
     else:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print(colorstr("Loading checkpoint %s..." % checkpoint, "blue"))
         checkpoint = torch.load(checkpoint)
         start_epoch = checkpoint['epoch'] + 1
         print('\nLoaded checkpoint from epoch %d.\n' % start_epoch)
@@ -104,15 +108,33 @@ def main():
     # Move to default device
     model = model.to(device)
     criterion = MultiBoxLoss(model.default_boxes).to(device)
+    print(colorstr("Model initialized", "green"), flush=True)
+    print(colorstr("Initializing dataset...", "cyan"), flush=True)
+    try:
+        train_dataset = VOCDataset(data_folder, split="train")
+    except:
+        create_json_data("./VOCdevkit/VOC2012", "./JSONdata")
+        train_dataset = VOCDataset(data_folder, split="train")
 
-    train_dataset = VOCDataset(data_folder, split="train")
+    print(colorstr("Dataset initialized!", "green"), flush=True)
+
+    print(colorstr("Loading Data...", "yellow"), flush=True)
+
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
                                                shuffle=True, collate_fn=combine,
                                                num_workers=workers, pin_memory=True)
+    print(colorstr("Data loaded!", "green"), flush=True)
+
     epochs = iterations // (len(train_dataset) // batch_size)
     decay_lr_at = [it // (len(train_dataset) // batch_size)
                    for it in decay_lr_at]
 
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(colorstr("Training model....", "magenta"))
+    print(colorstr("Epochs :", "brightblue"), colorstr(f"{epochs}", "blue"))
+    print(colorstr("Decay Learning Rate :", "brightblue"),
+          colorstr(f"{decay_lr_at}", "blue"))
+    display_gpu_info()
     for epoch in range(start_epoch, epochs):
         if epoch in decay_lr_at:
             print("Decay learning rate...")
@@ -134,7 +156,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     for i, (images, boxes, labels, _) in enumerate(train_loader):
 
-        images = images.to(device)  # (batch_size (N), 3, 300, 300)
+        images = images.to(device)  # (batch_size (N), 3, 256, 256)
         boxes = [b.to(device) for b in boxes]
         labels = [l.to(device) for l in labels]
 
@@ -155,9 +177,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         losses.update(loss.item(), images.size(0))
 
-        if i % print_freq == 0:
-            print('Epoch: [{0}][{1}/{2}]\t' 'Loss {loss.val:.4f} ( Average Loss per epoch: {loss.avg:.4f})\t'.format(
-                epoch, i, len(train_loader), loss=losses))
+        # if i % print_freq == 0:
+
+        print('Epoch: [{0}][{1}/{2}]\t' 'Loss {loss.val:.4f} ( Average Loss per epoch: {loss.avg:.4f})\t'.format(
+            epoch, i, len(train_loader), loss=losses), flush=True, end=('\n' if i == len(train_loader)-1 else '\r'))
+
     del locs_pred, cls_pred, images, boxes, labels
 
 

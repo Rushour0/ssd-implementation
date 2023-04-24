@@ -59,6 +59,7 @@ class PredictionNetwork(nn.Module):
         l_conv4_3 = l_conv4_3.permute(
             0, 2, 3, 1).contiguous()  # (N, 32, 32, 16)
         l_conv4_3 = l_conv4_3.view(batch_size, -1, 4)  # (N, 4096, 4)
+
         assert l_conv4_3.size(1) == 4096
 
         l_conv7 = self.conv7_loc(conv7_out)  # (N, 24, 16, 16)
@@ -70,6 +71,7 @@ class PredictionNetwork(nn.Module):
         l_conv8_2 = l_conv8_2.permute(
             0, 2, 3, 1).contiguous()  # (N, 8, 8, 24)
         l_conv8_2 = l_conv8_2.view(batch_size, -1, 4)  # (N, 384, 4)
+        
         assert l_conv8_2.size(1) == 384
 
         l_conv9_2 = self.conv9_2_loc(conv9_2_out)  # (N, 24, 4, 4)
@@ -98,10 +100,12 @@ class PredictionNetwork(nn.Module):
         assert c_conv4_3.size(1) == 4096
 
         c_conv7 = self.conv7_cls(conv7_out)  # (N, 6*classes, 16, 16)
-        
-        c_conv7 = c_conv7.permute(0, 2, 3, 1).contiguous() # (N, 16, 16, 6*classes)
-        
-        c_conv7 = c_conv7.view(batch_size, -1, self.num_classes) # (N, 1536, classes)
+
+        # (N, 16, 16, 6*classes)
+        c_conv7 = c_conv7.permute(0, 2, 3, 1).contiguous()
+
+        # (N, 1536, classes)
+        c_conv7 = c_conv7.view(batch_size, -1, self.num_classes)
         assert c_conv7.size(1) == 1536
 
         c_conv8_2 = self.conv8_2_cls(conv8_2_out)  # (N, 6*clases, 8, 8)
