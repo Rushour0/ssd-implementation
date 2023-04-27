@@ -20,9 +20,9 @@ def str2bool(v):
 ap = argparse.ArgumentParser()
 ap.add_argument("--dataset_root", default="./JSONdata/",
                 help="Dataroot directory path")
-ap.add_argument("--batch_size", default=4, type=int,
+ap.add_argument("--batch_size", default=24, type=int,
                 help="Batch size for training")
-ap.add_argument("--num_workers", default=12,
+ap.add_argument("--num_workers", default=6,
                 type=int, help="Number of workers")
 ap.add_argument("--lr", "--learning-rate", default=1e-3,
                 type=float, help="Learning rate")
@@ -141,7 +141,8 @@ def main():
 
         # Save
         save_checkpoint(epoch, model, optimizer)
-
+    
+    print(colorstr("Training finished!", "green"), flush=True)
 
 def train(train_loader, model, criterion, optimizer, epoch):
     '''
@@ -149,9 +150,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
     '''
     model.train()
     losses = Metrics()
+    
+    data_loop = tqdm(train_loader, desc=f"Epoch {epoch}: ", unit="images")
 
-    for i,(images, boxes, labels, _) in tqdm(enumerate(train_loader, desc=f"Epoch {epoch}: ", unit="images")):
-
+    for (images, boxes, labels, _) in data_loop:
+        data_loop.update()
         images = images.to(device)  # (batch_size (N), 2, 256, 256)
         boxes = [b.to(device) for b in boxes]
         labels = [l.to(device) for l in labels]
@@ -175,9 +178,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # if i % print_freq == 0:
 
-        print(torch.cuda.memory_summary(device=0, abbreviated=False), 'Loss {loss.val:.4f} ( Average Loss per epoch: {loss.avg:.4f})\t'.format(loss=losses),
-              flush=True, end=('\n' if i == len(train_loader)-1 else '\r'))
-
+        data_loop.write('Loss {loss.val:.4f} ( Average Loss per epoch: {loss.avg:.4f})\t'.format(loss=losses), end='\r')
+        # print(torch.cuda.memory_allocated(device=0), flush=True, end='\r')
+    
     del locs_pred, cls_pred, images, boxes, labels
 
 
