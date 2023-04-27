@@ -10,7 +10,7 @@ import sys
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--trained_model", default="check_ssd256.pth.tar", type=str,
+ap.add_argument("--trained_model", default="models/ssd256-24b-6w.pth.tar", type=str,
                 help="Trained state_dict file path to open")
 ap.add_argument("--input", type=str, help="Input path for detect")
 ap.add_argument("--output", type=str, help="Output path to save")
@@ -71,23 +71,26 @@ def detect(model, device, original_image, min_score, max_overlap, top_k, suppres
                 continue
 
         box_location = detect_boxes[i].tolist()
-        print("detect_boxes: ", detect_boxes[i])
+        
         draw.rectangle(xy=box_location,
                        outline=label_color_map[detect_labels[i]])
 
         draw.rectangle(xy=[l + 1. for l in box_location],
                        outline=label_color_map[detect_labels[i]])
 
-        text_size = font.getsize(detect_labels[i].upper())
+        text = ""
+        if detect_scores is not None:
+            text = f"{detect_labels[i].upper()} {detect_scores[i][0]:.2f}"
+        text_size = font.getsize(text)
         text_location = [box_location[0] + 2., box_location[1] - text_size[1]]
         textbox_location = [box_location[0], box_location[1] - text_size[1], box_location[0] + text_size[0] + 4.,
                             box_location[1]]
         draw.rectangle(xy=textbox_location,
                        fill=label_color_map[detect_labels[i]])
         draw.text(xy=text_location,
-                  text=detect_labels[i].upper(), fill='white', font=font)
+                  text=text, fill='white', font=font)
 
-    print("Detect label: ", detect_labels)
+    
     return annotated_image
 
 

@@ -13,7 +13,7 @@ ap.add_argument("--data_path", default="./JSONdata/",
 ap.add_argument("--batch_size", default=24, type=int,
                 help="Batch size for evaluating")
 ap.add_argument("--num_workers", default=6, type=int, help="Number of workers")
-ap.add_argument("--trained_model", default="check_ssd256.pth.tar", type=str,
+ap.add_argument("--trained_model", default="models/ssd256-24b-6w.pth.tar", type=str,
                 help="Trained state_dict file path to open")
 ap.add_argument("--min_score", default=0.01,
                 type=float, help="Min score for NMS")
